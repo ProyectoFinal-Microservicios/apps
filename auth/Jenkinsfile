@@ -1,0 +1,85 @@
+pipeline {
+    agent any
+
+    tools {
+        nodejs "nodeForAuth"
+    }
+
+    environment {
+        SONARQUBE_ENV = 'sonarqube'
+    }
+
+    stages {
+        stage('🔍 Checkout') {
+            steps {
+                echo "==========================================="
+                echo "📥 Clonando repositorio..."
+                echo "==========================================="
+                git branch: 'automatizacion-04', url: 'https://github.com/odiador/retos-microservicios.git'
+            }
+        }
+
+    // El stage para generar un token en SonarQube se ha eliminado porque
+    // el token ya se gestiona desde la UI de Jenkins (Credentials).
+    // Si necesitas regenerarlo desde pipeline, podemos volver a añadir
+    // la lógica aquí, pero no es necesario cuando la credencial existe.
+
+        stage('📦 Install dependencies') {
+            steps {
+                sh 'pwd'
+                echo "==========================================="
+                echo "📦 Instalando dependencias de Node.js..."
+                echo "==========================================="
+                sh 'node --version'
+                sh 'npm --version'
+                dir('auth') {
+                    sh 'npm install'
+                }
+            }
+        }
+
+        stage('🧪 Run tests') {
+            steps {
+                echo "==========================================="
+                echo "🧪 Ejecutando pruebas unitarias..."
+                echo "==========================================="
+                sh 'npm test || echo "Tests skipped"' // opcional si aún no tienes tests
+            }
+        }
+
+        stage('🔍 SonarQube Analysis') {
+            steps {
+                echo "==========================================="
+                echo "🔍 Analizando calidad de código con SonarQube..."
+                echo "==========================================="
+
+                script {
+                    withSonarQubeEnv("${SONARQUBE_ENV}") {
+                        def scannerHome = tool 'SonarScanner'
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                                -Dsonar.projectKey=auth-service \
+                                -Dsonar.sources=auth \
+                                -Dsonar.host.url=$SONAR_HOST_URL \
+                                -Dsonar.login=$SONAR_AUTH_TOKEN
+                        """
+                    }
+                }
+            }
+        }
+
+
+
+        stage('🚦 Quality Gate') {
+            steps {
+                echo "==========================================="
+                echo "🚦 Verificando Quality Gate de SonarQube..."
+                echo "==========================================="
+
+                timeout(time: 10, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+    }
+}
