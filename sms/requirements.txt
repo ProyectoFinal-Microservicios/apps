@@ -1,0 +1,13 @@
+Flask
+twilio
+requests==2.31.0
+python-dotenv
+gunicorn
+pika
+psutil
+python-consul2
+
+# Testing dependencies
+pytest
+pytest-cov
+pytest-mock
