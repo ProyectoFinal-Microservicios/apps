@@ -1,4 +1,3 @@
-
 import { serve } from '@hono/node-server'
 import { app } from './app.js'
 import auth from './routes/auth.js'
@@ -11,6 +10,7 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import logger from './logger.js'
+import { waitForDatabase } from './wait-for-db.js'
 import Consul from 'consul'
 
 // Soporte para dotenv si la flag --use-env está presente
@@ -35,7 +35,7 @@ async function ensureAdminUser() {
   try {
     const existing = await db(`SELECT id FROM ${SCHEMA}.users WHERE email=$1 OR username=$2 LIMIT 1`, [email, username])
     if (existing.rows.length === 0) {
-      const hash = await bcrypt.hash(password, 10)      
+      const hash = await bcrypt.hash(password, 10)
       await db(`INSERT INTO ${SCHEMA}.users (username,email,password,first_name,last_name,role,status) VALUES ($1,$2,$3,$4,$5,'admin','active')`, [username, email, hash, 'Admin', 'User'])
       logger.info('[seed] Usuario admin creado: admin@gmail.com / admin123')
     } else {
@@ -65,7 +65,6 @@ app.get('/doc', async (c) => {
   }
 })
 
-
 app.get(
   '/ui',
   swaggerUI({
@@ -73,44 +72,60 @@ app.get(
   })
 )
 
-
 app.notFound((c) => c.text('Recurso no encontrado', 404))
 
-await ensureAdminUser()
-
-// Registrar servicio en Consul
-async function registerWithConsul() {
+// Función principal de inicio
+async function startServer() {
   try {
-    const consulHost = process.env.CONSUL_HOST || 'consul'
-    const consulPort = parseInt(process.env.CONSUL_PORT || '8500')
-    const servicePort = parseInt(process.env.PORT || '3500')
-    
-    const consul = new Consul({
-      host: consulHost,
-      port: consulPort,
-      promisify: true
+    // Esperar a que la base de datos esté disponible
+    await waitForDatabase();
+
+    // Crear usuario admin
+    await ensureAdminUser();
+
+    const servicePort = parseInt(process.env.AUTH_PORT || '3500')
+
+    // Registrar servicio en Consul
+    async function registerWithConsul() {
+      try {
+        const consulHost = process.env.CONSUL_HOST || 'consul'
+        const consulPort = parseInt(process.env.CONSUL_PORT || '8500')
+
+        const consul = new Consul({
+          host: consulHost,
+          port: consulPort,
+          promisify: true
+        })
+
+        await consul.agent.service.register({
+          id: 'auth',
+          name: 'auth-service',
+          address: 'auth',
+          port: servicePort,
+          check: {
+            http: `http://auth:${servicePort}/health`,
+            interval: '10s',
+            timeout: '5s'
+          }
+        })
+
+        logger.info(`[consul] Registered with Consul as auth-service (id: auth) at ${consulHost}:${consulPort}`)
+      } catch (err) {
+        logger.error('[consul] Failed to register with Consul', err)
+      }
+    }
+
+    await registerWithConsul()
+
+    serve({ fetch: app.fetch, port: servicePort }, (info) => {
+      logger.info(`Server is running on http://localhost:${info.port}`)
     })
 
-    await consul.agent.service.register({
-      id: 'auth-service-1',
-      name: 'auth-service',
-      address: 'auth',
-      port: servicePort,
-      check: {
-        http: `http://auth:${servicePort}/health`,
-        interval: '10s',
-        timeout: '5s'
-      }
-    })
-    
-    logger.info(`[consul] Registered with Consul as auth-service at ${consulHost}:${consulPort}`)
-  } catch (err) {
-    logger.error('[consul] Failed to register with Consul', err)
+  } catch (error) {
+    logger.error('Failed to start server:', error)
+    process.exit(1)
   }
 }
 
-await registerWithConsul()
-
-serve({ fetch: app.fetch, port: 3500 }, (info) => {
-  logger.info(`Server is running on http://localhost:${info.port}`)
-},)
+// Iniciar el servidor
+startServer();

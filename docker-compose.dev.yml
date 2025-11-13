@@ -3,6 +3,10 @@ services:
     image: postgres:16-alpine
     env_file: .env
     container_name: db
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
     ports:
       - "5432:5432"
     volumes:
@@ -10,6 +14,12 @@ services:
       - ./db:/docker-entrypoint-initdb.d:ro
     networks:
       - ms-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   auth:
     build: ./auth
@@ -17,23 +27,51 @@ services:
     ports:
       - "3500:3500"
     env_file: .env
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_SCHEMA=auth
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      consul:
+        condition: service_healthy 
+      rabbitmq:
+        condition: service_healthy 
     networks:
       - ms-net
-
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3500/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
   profiles:
     build: ./profiles
     container_name: profiles
     ports:
       - "8000:8000"
     env_file: .env
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
     depends_on:
-      - db
-      - auth
+      db:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
+      consul:
+        condition: service_healthy 
+      rabbitmq:
+        condition: service_healthy 
     networks:
       - ms-net
-
   sms:
     build: ./sms
     container_name: sms
@@ -42,10 +80,12 @@ services:
     env_file: .env
     networks:
       - ms-net
-
+    depends_on:
+      db:
+        condition: service_healthy
+      consul:
+        condition: service_healthy 
+      rabbitmq:
+        condition: service_healthy 
 volumes:
   dbdata:
-
-networks:
-  ms-net:
-    driver: bridge
