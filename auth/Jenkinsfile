@@ -15,7 +15,7 @@ pipeline {
                 echo "==========================================="
                 echo "📥 Clonando repositorio..."
                 echo "==========================================="
-                git branch: 'automatizacion-04', url: 'https://github.com/odiador/retos-microservicios.git'
+                checkout scm
             }
         }
 
