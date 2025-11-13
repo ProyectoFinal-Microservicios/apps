@@ -1,8 +1,8 @@
 export default {
   default: {
     require: [
-      'test/acceptance/steps/**/*.js',
-      'test/acceptance/support/**/*.js'
+      'file:test/acceptance/steps/**/*.js',
+      'file:test/acceptance/support/**/*.js'
     ],
     format: [
       'progress-bar',
@@ -22,8 +22,8 @@ export default {
   },
   ci: {
     require: [
-      'test/acceptance/steps/**/*.js',
-      'test/acceptance/support/**/*.js'
+      'file:test/acceptance/steps/**/*.js',
+      'file:test/acceptance/support/**/*.js'
     ],
     format: [
       'progress',

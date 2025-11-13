@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test:acceptance": "cucumber-js",
-    "test:acceptance:report": "cucumber-js --format html:test/acceptance/reports/cucumber-report.html",
-    "test:acceptance:watch": "nodemon --exec cucumber-js",
-    "test:acceptance:headless": "cucumber-js --format json:test/acceptance/reports/cucumber-report.json --format progress-bar"
+    "test:acceptance": "npx cucumber-js --require \"test/acceptance/steps/**/*.js\" --require \"test/acceptance/support/**/*.js\" --config cucumber.js \"test/acceptance/features/*.feature\"",
+    "test:acceptance:report": "npx cucumber-js --require \"test/acceptance/steps/**/*.js\" --require \"test/acceptance/support/**/*.js\" \"test/acceptance/features/*.feature\" --format html:test/acceptance/reports/cucumber-report.html",
+    "test:acceptance:watch": "nodemon --exec \"npx cucumber-js --require \\\"test/acceptance/steps/**/*.js\\\" --require \\\"test/acceptance/support/**/*.js\\\" \\\"test/acceptance/features/*.feature\\\"\"",
+    "test:acceptance:headless": "npx cucumber-js --require \"test/acceptance/steps/**/*.js\" --require \"test/acceptance/support/**/*.js\" \"test/acceptance/features/*.feature\" --format json:test/acceptance/reports/cucumber-report.json --format progress-bar"
   },
   "type": "module",
   "dependencies": {
@@ -29,9 +29,8 @@
   },
   "devDependencies": {
     "@cucumber/cucumber": "^9.5.1",
-    "@cucumber/pretty": "^1.1.1",
     "ajv": "^8.12.0",
-    "ajv-formats": "^2.2.2",
+    "ajv-formats": "^2.1.1",
     "assert": "^2.1.0",
     "nodemon": "^3.0.1"
   }

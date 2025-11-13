@@ -6,7 +6,7 @@
 $ npm run test:acceptance
 
 > reto-3-auth@1.0.0 test:acceptance
-> cucumber-js
+> cucumber.js
 
 Feature: Autenticación de Usuarios
 
@@ -59,7 +59,7 @@ Feature: Gestión de Usuarios
 $ npm run test:acceptance:report
 
 > reto-3-auth@1.0.0 test:acceptance:report
-> cucumber-js --format html:test/acceptance/reports/cucumber-report.html --format progress-bar
+> cucumber.js --format html:test/acceptance/reports/cucumber.report.html --format progress-bar
 
 [████████████████████████████████████████] 100%
 
@@ -71,7 +71,7 @@ Luego abrir `test/acceptance/reports/cucumber-report.html` en el navegador.
 ## Ejemplo 3: Ejecutar un feature específico
 
 ```bash
-$ npx cucumber-js test/acceptance/features/authentication.feature
+$ npx cucumber.js test/acceptance/features/authentication.feature
 
 Feature: Autenticación de Usuarios
   Como usuario del sistema
@@ -217,7 +217,7 @@ $ npm run test:acceptance:watch
 [nodemon] to restart at any time, type `rs`
 [nodemon] watching path(s): test/acceptance/**
 [nodemon] watching extensions: js,json
-[nodemon] starting `cucumber-js`
+[nodemon] starting `cucumber.js`
 
 Feature: Autenticación de Usuarios
 ...
@@ -229,7 +229,7 @@ Feature: Autenticación de Usuarios
 # Cambiar un archivo y automáticamente se re-ejecutan las pruebas
 [nodemon] restarting due to changes...
 [nodemon] restarting due to changes in test/acceptance/features/authentication.feature
-[nodemon] starting `cucumber-js`
+[nodemon] starting `cucumber.js`
 
 Feature: Autenticación de Usuarios
 ...
@@ -265,7 +265,7 @@ Test Results:
 $ npm run test:acceptance
 
 > reto-3-auth@1.0.0 test:acceptance
-> cucumber-js
+> cucumber.js
 
 Feature: Autenticación de Usuarios
 

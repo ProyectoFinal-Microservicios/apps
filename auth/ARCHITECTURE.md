@@ -354,7 +354,7 @@ When('debug', function() {
 
 ### Ejecutar Escenario Específico
 ```bash
-npx cucumber-js -n "Registrar un nuevo usuario exitosamente"
+npx cucumber.js -n "Registrar un nuevo usuario exitosamente"
 ```
 
 ### Activar Logs Detallados

@@ -1,7 +1,7 @@
 import { Given, When, Then, Before } from '@cucumber/cucumber'
 import ApiClient from '../support/api-client.js'
 import schemaValidator from '../support/schema-validator.js'
-import assert from 'assert'
+import { strict as assert } from 'node:assert'
 
 let apiClient
 let lastResponse
