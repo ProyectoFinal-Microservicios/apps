@@ -1,6 +1,6 @@
 networks:
   ms-net:
-    external: true
+    driver: bridge
 
 services:
   db:
