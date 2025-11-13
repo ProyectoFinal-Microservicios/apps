@@ -1,15 +1,13 @@
-version: "3.9"
-
 networks:
-  retos-net:
-    driver: bridge
+  ms-net:
+    external: true
 
 services:
   db:
     image: postgres:16-alpine
     container_name: retos-postgres
     networks:
-      - retos-net
+      - ms-net
     environment:
       POSTGRES_DB: ${DB_NAME:-retos_microservicios}
       POSTGRES_USER: ${DB_USER:-postgres}
@@ -20,7 +18,7 @@ services:
   auth:
     image: ghcr.io/proyectofinal-microservicios/auth:latest
     networks:
-      - retos-net
+      - ms-net
     ports:
       - "3500:3500"
     environment:
@@ -36,7 +34,7 @@ services:
   profiles:
     image: ghcr.io/proyectofinal-microservicios/profiles:latest
     networks:
-      - retos-net
+      - ms-net
     ports:
       - "8000:8000"
     environment:
@@ -52,7 +50,7 @@ services:
   sms:
     image: ghcr.io/proyectofinal-microservicios/sms:latest
     networks:
-      - retos-net
+      - ms-net
     ports:
       - "6379:6379"
     environment:
