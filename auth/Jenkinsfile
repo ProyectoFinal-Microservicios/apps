@@ -55,7 +55,7 @@ pipeline {
 
                 script {
                     withSonarQubeEnv("${SONARQUBE_ENV}") {
-                        def scannerHome = tool 'SonarScanner'
+                        def scannerHome = tool 'sonarForAuth'
                         sh """
                             ${scannerHome}/bin/sonar-scanner \
                                 -Dsonar.projectKey=auth-service \
