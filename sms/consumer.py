@@ -70,9 +70,9 @@ def register_with_consul():
         
         c = consul.Consul(host=consul_host, port=consul_port)
         
-        service_id = 'sms-service-1'
+        service_id = 'sms'
         service_name = 'sms-service'
-        service_port = 5001
+        service_port = int(os.environ.get('SMS_SERVICE_PORT', '6379'))
         
         c.agent.service.register(
             name=service_name,
