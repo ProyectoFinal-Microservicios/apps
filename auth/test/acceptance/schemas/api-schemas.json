@@ -1,0 +1,225 @@
+{
+  "registerResponseSchema": {
+    "type": "object",
+    "required": ["message", "user", "access_token", "token_type"],
+    "properties": {
+      "message": {
+        "type": "string",
+        "pattern": "Usuario registrado exitosamente"
+      },
+      "user": {
+        "type": "object",
+        "required": ["id", "username", "email", "firstName", "lastName", "phone", "role", "status", "createdAt"],
+        "properties": {
+          "id": { "type": "string" },
+          "username": { "type": "string", "minLength": 3, "maxLength": 20 },
+          "email": { "type": "string", "format": "email" },
+          "firstName": { "type": "string", "minLength": 1 },
+          "lastName": { "type": "string", "minLength": 1 },
+          "phone": { "type": "string" },
+          "role": { "type": "string", "enum": ["user", "admin"] },
+          "status": { "type": "string", "enum": ["active", "inactive", "suspended"] },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "lastLoginAt": {
+            "oneOf": [
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
+            ]
+          }
+        }
+      },
+      "access_token": {
+        "type": "string",
+        "minLength": 20
+      },
+      "token_type": {
+        "type": "string",
+        "enum": ["Bearer"]
+      },
+      "expires_in": {
+        "oneOf": [
+          { "type": "number", "minimum": 0 },
+          { "type": "null" }
+        ]
+      }
+    }
+  },
+
+  "loginResponseSchema": {
+    "type": "object",
+    "required": ["access_token", "token_type", "user"],
+    "properties": {
+      "access_token": {
+        "type": "string",
+        "minLength": 20
+      },
+      "token_type": {
+        "type": "string",
+        "enum": ["Bearer"]
+      },
+      "expires_in": {
+        "oneOf": [
+          { "type": "number", "minimum": 0 },
+          { "type": "null" }
+        ]
+      },
+      "message": { "type": "string" },
+      "user": {
+        "type": "object",
+        "required": ["id", "username", "email"],
+        "properties": {
+          "id": { "type": "string" },
+          "username": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "phone": { "type": "string" },
+          "role": { "type": "string" },
+          "status": { "type": "string" },
+          "createdAt": { "type": "string" },
+          "updatedAt": { "type": "string" },
+          "lastLoginAt": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "null" }
+            ]
+          }
+        }
+      }
+    }
+  },
+
+  "userProfileSchema": {
+    "type": "object",
+    "required": ["user"],
+    "properties": {
+      "user": {
+        "type": "object",
+        "required": ["id", "username", "email", "firstName", "lastName", "phone", "role", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "username": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "phone": { "type": "string" },
+          "role": { "type": "string", "enum": ["user", "admin"] },
+          "status": { "type": "string", "enum": ["active", "inactive", "suspended"] },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "lastLoginAt": {
+            "oneOf": [
+              { "type": "string", "format": "date-time" },
+              { "type": "null" }
+            ]
+          }
+        }
+      }
+    }
+  },
+
+  "updateProfileResponseSchema": {
+    "type": "object",
+    "required": ["user"],
+    "properties": {
+      "user": {
+        "type": "object",
+        "required": ["id", "username", "email", "firstName", "lastName", "phone"],
+        "properties": {
+          "id": { "type": "string" },
+          "username": { "type": "string" },
+          "email": { "type": "string" },
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "phone": { "type": "string" },
+          "role": { "type": "string" },
+          "status": { "type": "string" },
+          "createdAt": { "type": "string" },
+          "updatedAt": { "type": "string" },
+          "lastLoginAt": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "null" }
+            ]
+          }
+        }
+      }
+    }
+  },
+
+  "changePasswordResponseSchema": {
+    "type": "object",
+    "required": ["message"],
+    "properties": {
+      "message": {
+        "type": "string"
+      }
+    }
+  },
+
+  "passwordResetCodeSchema": {
+    "type": "object",
+    "required": ["message"],
+    "properties": {
+      "message": {
+        "type": "string"
+      }
+    }
+  },
+
+  "usersListSchema": {
+    "type": "object",
+    "required": ["items", "total", "page", "limit"],
+    "properties": {
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "username", "email"],
+          "properties": {
+            "id": { "type": "string" },
+            "username": { "type": "string" },
+            "email": { "type": "string", "format": "email" },
+            "firstName": { "type": "string" },
+            "lastName": { "type": "string" },
+            "phone": { "type": "string" },
+            "role": { "type": "string" },
+            "status": { "type": "string" },
+            "createdAt": { "type": "string" },
+            "updatedAt": { "type": "string" },
+            "lastLoginAt": {
+              "oneOf": [
+                { "type": "string" },
+                { "type": "null" }
+              ]
+            }
+          }
+        }
+      },
+      "total": { "type": "number", "minimum": 0 },
+      "page": { "type": "number", "minimum": 1 },
+      "limit": { "type": "number", "minimum": 1 }
+    }
+  },
+
+  "errorResponseSchema": {
+    "type": "object",
+    "required": ["error"],
+    "properties": {
+      "error": {
+        "type": "string"
+      }
+    }
+  },
+
+  "deleteAccountResponseSchema": {
+    "type": "object",
+    "required": ["message"],
+    "properties": {
+      "message": {
+        "type": "string"
+      }
+    }
+  }
+}

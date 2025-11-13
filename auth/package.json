@@ -4,7 +4,11 @@
   "description": "Servicio de autenticación JWT con Hono",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "test:acceptance": "cucumber-js",
+    "test:acceptance:report": "cucumber-js --format html:test/acceptance/reports/cucumber-report.html",
+    "test:acceptance:watch": "nodemon --exec cucumber-js",
+    "test:acceptance:headless": "cucumber-js --format json:test/acceptance/reports/cucumber-report.json --format progress-bar"
   },
   "type": "module",
   "dependencies": {
@@ -22,5 +26,13 @@
     "swagger-ui-dist": "^5.28.1",
     "yaml": "^2.8.1",
     "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^9.5.1",
+    "@cucumber/pretty": "^1.1.1",
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.2.2",
+    "assert": "^2.1.0",
+    "nodemon": "^3.0.1"
   }
 }
