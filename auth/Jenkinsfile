@@ -70,16 +70,6 @@ pipeline {
 
 
 
-        stage('🚦 Quality Gate') {
-            steps {
-                echo "==========================================="
-                echo "🚦 Verificando Quality Gate de SonarQube..."
-                echo "==========================================="
-
-                timeout(time: 10, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
+        // Quality Gate stage removed per request: SonarQube analysis remains
     }
 }
