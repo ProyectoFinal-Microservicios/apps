@@ -90,20 +90,20 @@ pipeline {
         // Quality Gate and Docker build/deploy stages removed per request.
     }
 
-    post {
-        always {
-            sh '''
-                cd sms
-                # Limpiar archivos temporales
-                rm -f test-results.xml coverage.xml
-                rm -rf htmlcov
-            '''
-        }
-        success {
-            echo 'Pipeline completed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed!'
-        }
-    }
+    // post {
+    //     always {
+    //         sh '''
+    //             cd sms
+    //             # Limpiar archivos temporales
+    //             rm -f test-results.xml coverage.xml
+    //             rm -rf htmlcov
+    //         '''
+    //     }
+    //     success {
+    //         echo 'Pipeline completed successfully!'
+    //     }
+    //     failure {
+    //         echo 'Pipeline failed!'
+    //     }
+    // }
 }
