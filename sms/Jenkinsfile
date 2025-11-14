@@ -1,14 +1,14 @@
 pipeline {
     agent any
 
-    environment {
-        SONAR_HOST_URL = credentials('sonar-host-url')
-        SONAR_TOKEN = credentials('sonar-token')
-        RABBITMQ_URL = 'amqp://admin:securepass@rabbitmq:5672'
-        TWILIO_ACCOUNT_SID = credentials('twilio-account-sid')
-        TWILIO_AUTH_TOKEN = credentials('twilio-auth-token')
-        TWILIO_PHONE_NUMBER = credentials('twilio-phone-number')
-    }
+    // environment {
+    //     SONAR_HOST_URL = credentials('sonar-host-url')
+    //     SONAR_TOKEN = credentials('sonar-token')
+    //     RABBITMQ_URL = 'amqp://admin:securepass@rabbitmq:5672'
+    //     TWILIO_ACCOUNT_SID = credentials('twilio-account-sid')
+    //     TWILIO_AUTH_TOKEN = credentials('twilio-auth-token')
+    //     TWILIO_PHONE_NUMBER = credentials('twilio-phone-number')
+    // }
 
     stages {
         stage('🔍 Checkout') {
