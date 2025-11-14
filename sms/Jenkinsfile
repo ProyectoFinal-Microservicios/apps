@@ -28,10 +28,9 @@ pipeline {
 
         stage('Unit Tests') {
             steps {
-                sh '''
-                    cd sms
-                    python -m pytest test_consumer.py -v --junitxml=test-results.xml || true
-                '''
+                dir('sms') {
+                    sh 'python -m pytest test_consumer.py -v --junitxml=test-results.xml || true'
+                }
             }
             post {
                 always {
