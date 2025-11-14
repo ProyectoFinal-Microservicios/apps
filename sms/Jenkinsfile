@@ -19,6 +19,7 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
+                sh 'ls -la'
                 dir('sms') {
                     sh 'pip install -r requirements.txt'
                 }
