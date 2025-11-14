@@ -28,6 +28,7 @@ pipeline {
             steps {
                 sh 'ls -la'
                 dir('sms') {
+                    sh 'python3 --version'
                     sh 'pip install -r requirements.txt'
                 }
             }
