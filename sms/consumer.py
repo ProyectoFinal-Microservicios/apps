@@ -107,42 +107,134 @@ def handle_sms_message(body):
         event_data = json.loads(body)
         log_json('INFO', 'Procesando SMS', payload=event_data)
 
-        recipient = event_data.get('recipient')
-        message = event_data.get('message')
         event_type = event_data.get('type')
+        routing_key = getattr(properties, 'routing_key', '') if 'properties' in locals() else ''
 
-        if not recipient or not message:
-            log_json('ERROR', 'Datos incompletos', payload={'recipient': recipient, 'message': message})
-            return
+        # ======================================================
+        # CASO 1: Alertas de servicio (enviadas con routing key "service.alert")
+        # ======================================================
+        if event_type == 'service.alert' or routing_key == 'service.alert':
+            service = event_data.get('service', 'unknown')
+            alert_name = event_data.get('alert_name', 'Alert')
+            instance = event_data.get('instance', '')
+            severity = event_data.get('severity', '')
+            timestamp = event_data.get('timestamp', '')
 
-        # Si Twilio no está configurado, solo logear
-        if not twilio_client:
-            log_json('INFO', 'SMS simulado', payload={'to': recipient, 'message': message})
-            return
-
-        # Validar formato del número de teléfono
-        if not recipient.startswith('+'):
-            log_json('WARN', 'Número sin formato internacional', payload={'recipient': recipient})
-            recipient = '+57' + recipient.lstrip('+0')  # Agregar código de Colombia por defecto
-
-        # Enviar SMS real con Twilio
-        try:
-            response = twilio_client.messages.create(
-                body=message,
-                from_=TWILIO_PHONE_NUMBER,
-                to=recipient
+            # Generar mensaje automático para alertas
+            message = (
+                f"🚨 ALERTA: {alert_name}\n"
+                f"Servicio: {service}\n"
+                f"Severidad: {severity}\n"
+                f"Instancia: {instance}\n"
+                f"Tiempo: {timestamp}"
             )
-            log_json('INFO', 'SMS enviado exitosamente', payload={'to': recipient, 'sid': getattr(response, 'sid', None)})
 
-        except TwilioException as e:
-            log_json('ERROR', 'Error de Twilio enviando SMS', payload={'to': recipient, 'error': str(e)})
-        except Exception as e:
-            log_json('ERROR', 'Error inesperado enviando SMS', payload={'to': recipient, 'error': str(e)})
+            # Recipient para alertas - usar variable de entorno
+            recipient = (
+                os.environ.get('ALERT_SMS_RECIPIENT') or 
+                os.environ.get('SMS_DEFAULT_RECIPIENT') or
+                '+573001234567'  # fallback para testing
+            )
+
+            if not recipient:
+                log_json(
+                    'ERROR',
+                    'No recipient configurado para alertas. Configure ALERT_SMS_RECIPIENT.',
+                    payload=event_data
+                )
+                return
+
+        # ======================================================
+        # CASO 2: Notificaciones normales (SEND_SMS)
+        # ======================================================
+        elif event_type in ['account.created', 'security.login', 'security.password_change']:
+            recipient = event_data.get('recipient')
+            message = event_data.get('message')
+
+            if not recipient:
+                log_json(
+                    'ERROR',
+                    'Evento normal sin recipient',
+                    payload=event_data
+                )
+                return
+
+            if not message:
+                # Construir mensaje basado en el tipo de evento
+                if event_type == 'account.created':
+                    message = f"¡Bienvenido! Tu cuenta ha sido creada exitosamente."
+                elif event_type == 'security.login':
+                    ip = event_data.get('ip', 'IP desconocida')
+                    message = f"Alerta: Nuevo acceso a tu cuenta desde {ip}"
+                elif event_type == 'security.password_change':
+                    message = f"Tu contraseña ha sido cambiada exitosamente"
+
+        # ======================================================
+        # CASO 3: Mensaje directo (estructura simple)
+        # ======================================================
+        else:
+            recipient = event_data.get('recipient') or event_data.get('to')
+            message = event_data.get('message') or event_data.get('body') or event_data.get('text')
+
+            if not recipient or not message:
+                log_json(
+                    'ERROR',
+                    'Estructura de mensaje no reconocida',
+                    payload=event_data
+                )
+                return
+
+        # ======================================================
+        # Enviar SMS (o simular)
+        # ======================================================
+        send_sms(recipient, message, event_type)
 
     except json.JSONDecodeError as e:
         log_json('ERROR', 'Error parseando JSON', payload={'error': str(e), 'body': body})
     except Exception as e:
         log_json('ERROR', 'Error procesando mensaje', payload={'error': str(e), 'body': body})
+
+def send_sms(recipient, message, event_type=None):
+    """Función centralizada para enviar SMS"""
+    # Normalizar número
+    if not recipient.startswith('+'):
+        log_json('WARN', 'Número sin formato internacional', payload={'recipient': recipient})
+        recipient = '+57' + recipient.lstrip('+0')
+
+    # Twilio en modo simulado
+    if not twilio_client:
+        log_json(
+            'INFO',
+            'SMS simulado',
+            payload={
+                'to': recipient, 
+                'message': message,
+                'event_type': event_type
+            }
+        )
+        return
+
+    # Enviar con Twilio real
+    try:
+        response = twilio_client.messages.create(
+            body=message,
+            from_=TWILIO_PHONE_NUMBER,
+            to=recipient
+        )
+        log_json(
+            'INFO',
+            'SMS enviado exitosamente',
+            payload={
+                'to': recipient, 
+                'sid': getattr(response, 'sid', None),
+                'event_type': event_type
+            }
+        )
+
+    except TwilioException as e:
+        log_json('ERROR', 'Error de Twilio enviando SMS', payload={'to': recipient, 'error': str(e)})
+    except Exception as e:
+        log_json('ERROR', 'Error inesperado enviando SMS', payload={'to': recipient, 'error': str(e)})
 
 def callback(ch, method, properties, body):
     """Callback para procesar mensajes de RabbitMQ"""
@@ -170,6 +262,11 @@ def start_consumer():
         channel.exchange_declare(exchange=EXCHANGE, exchange_type='topic', durable=True, auto_delete=False)
         channel.queue_declare(queue=QUEUE, durable=True)
         channel.queue_bind(exchange=EXCHANGE, queue=QUEUE, routing_key=ROUTING_KEY)
+        channel.queue_bind(
+            exchange=EXCHANGE, 
+            queue=QUEUE, 
+            routing_key='service.alert'  # ← Agregar este binding también
+        )
         
         # Configurar consumer
         channel.basic_qos(prefetch_count=1)
