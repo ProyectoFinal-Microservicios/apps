@@ -7,8 +7,8 @@ pipeline {
     }
 
     environment {
-        SONAR_HOST_URL = 'http://sonarqube:9000'
-        SONAR_TOKEN = credentials('sonar-token')
+        SONARQUBE_ENV = 'sonarqube'
+    }
         RABBITMQ_URL = 'amqp://admin:securepass@rabbitmq:5672'
         TWILIO_ACCOUNT_SID=credentials('TWILIO_ACCOUNT_SID')
         TWILIO_AUTH_TOKEN=credentials('TWILIO_AUTH_TOKEN')
@@ -69,19 +69,15 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    def scannerHome = tool 'sonarForAuth'
-                    withSonarQubeEnv('sonarqube') {
-                        sh '''
-                            cd sms
-                            ${scannerHome}/bin/sonar-scanner \
+                    withSonarQubeEnv("${SONARQUBE_ENV}") {
+                        def scannerHome = tool 'sonarForAuth'
+                        sh """
+                        ${scannerHome}/bin/sonar-scanner \
                                 -Dsonar.projectKey=sms-service \
-                                -Dsonar.projectName="SMS Notification Service" \
-                                -Dsonar.sources=. \
-                                -Dsonar.tests=. \
-                                -Dsonar.test.inclusions=test_*.py \
-                                -Dsonar.python.coverage.reportPaths=coverage.xml \
-                                -Dsonar.python.xunit.reportPath=test-results.xml || true
-                        '''
+                                -Dsonar.sources=sms \
+                                -Dsonar.host.url=$SONAR_HOST_URL \
+                                -Dsonar.login=$SONAR_AUTH_TOKEN
+                        """
                     }
                 }
             }
