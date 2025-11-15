@@ -69,7 +69,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    def scannerHome = tool 'sonar-scanner-python'
+                    def scannerHome = tool 'sonarForAuth'
                     withSonarQubeEnv('sonarqube') {
                         sh '''
                             cd sms
