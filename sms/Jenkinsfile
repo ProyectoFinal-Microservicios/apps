@@ -1,13 +1,18 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.11-slim'
+            args '-u root'
+        }
+    }
 
     environment {
         SONAR_HOST_URL = credentials('sonar-host-url')
         SONAR_TOKEN = credentials('sonar-token')
         RABBITMQ_URL = 'amqp://admin:securepass@rabbitmq:5672'
-        TWILIO_ACCOUNT_SID = credentials('twilio-account-sid')
-        TWILIO_AUTH_TOKEN = credentials('twilio-auth-token')
-        TWILIO_PHONE_NUMBER = credentials('twilio-phone-number')
+        TWILIO_ACCOUNT_SID=credentials('TWILIO_ACCOUNT_SID')
+        TWILIO_AUTH_TOKEN=credentials('TWILIO_AUTH_TOKEN')
+        TWILIO_PHONE_NUMBER= credentials('TWILIO_PHONE_NUMBER')
     }
 
     stages {
@@ -23,6 +28,7 @@ pipeline {
             steps {
                 sh 'ls -la'
                 dir('sms') {
+                    sh 'python3 --version'
                     sh 'pip install -r requirements.txt'
                 }
             }
@@ -30,7 +36,7 @@ pipeline {
 
         stage('Unit Tests') {
             steps {
-                dir('sms') {
+                dir('sms/tests/unit') {
                     sh 'python -m pytest test_consumer.py -v --junitxml=test-results.xml || true'
                 }
             }
