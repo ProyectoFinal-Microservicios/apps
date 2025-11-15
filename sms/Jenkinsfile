@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        SONAR_HOST_URL = credentials('sonar-host-url')
+        SONAR_HOST_URL = 'http://sonarqube:9000'
         SONAR_TOKEN = credentials('sonar-token')
         RABBITMQ_URL = 'amqp://admin:securepass@rabbitmq:5672'
         TWILIO_ACCOUNT_SID=credentials('TWILIO_ACCOUNT_SID')
