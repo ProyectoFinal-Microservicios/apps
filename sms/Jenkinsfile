@@ -59,7 +59,7 @@ pipeline {
         stage('Coverage Report') {
             steps {
                 sh '''
-                    cd sms
+                    cd sms/tests/unit
                     python -m pytest test_consumer.py --cov=consumer --cov-report=xml --cov-report=html || true
                 '''
             }
