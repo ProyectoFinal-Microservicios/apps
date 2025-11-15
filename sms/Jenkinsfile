@@ -41,11 +41,6 @@ pipeline {
                     sh 'python -m pytest test_consumer.py -v --junitxml=test-results.xml || true'
                 }
             }
-            post {
-                always {
-                    junit 'sms/test-results.xml'
-                }
-            }
         }
 
         stage('Integration Tests') {
