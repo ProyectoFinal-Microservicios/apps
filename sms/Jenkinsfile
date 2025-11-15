@@ -65,9 +65,11 @@ pipeline {
             }
             post {
                 always {
-                    publishCoverage adapters: [coberturaAdapter('sms/coverage.xml')]
+                    recordCoverage tools: [
+                        cobertura(pattern: 'sms/coverage.xml')
+                    ]
                 }
-            }
+}
         }
 
         stage('SonarQube Analysis') {
