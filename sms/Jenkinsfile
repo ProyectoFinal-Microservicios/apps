@@ -63,13 +63,7 @@ pipeline {
                     python -m pytest test_consumer.py --cov=consumer --cov-report=xml --cov-report=html || true
                 '''
             }
-            post {
-                always {
-                    recordCoverage tools: [
-                        cobertura(pattern: 'sms/coverage.xml')
-                    ]
-                }
-}
+            
         }
 
         stage('SonarQube Analysis') {
