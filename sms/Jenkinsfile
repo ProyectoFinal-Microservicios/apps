@@ -48,7 +48,7 @@ pipeline {
                 script {
                     // Esperar a que RabbitMQ esté disponible
                     sh '''
-                        cd sms
+                        cd sms/tests/unit
                         # Enviar mensaje de prueba al bus
                         python test_sms.py "+573001234567" "Mensaje de integración desde Jenkins" || true
                     '''
